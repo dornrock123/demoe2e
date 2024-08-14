@@ -6,6 +6,6 @@ export default defineConfig({
       // implement node event listeners here
     },
     baseUrl: 'http://localhost:4200',
-    projectId: '7dce4153-18c0-4b50-b66d-763b4cc34082' // เพิ่ม projectId ที่นี่
+    projectId: 'vij7ps' // เพิ่ม projectId ที่นี่
   },
 });
