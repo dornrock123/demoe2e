@@ -13,10 +13,11 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16' # หรือเวอร์ชันที่คุณต้องการ
+        node-version: '18' # หรือเวอร์ชันที่คุณต้องการ
 
     - name: Install dependencies
       run: npm install
 
     - name: Run e2e tests
-      run: npm run e2e # คำสั่งนี้ขึ้นอยู่กับว่าคุณตั้งชื่อ script ใน package.json ว่าอย่างไร
+      run: npm run e2e # คำสั่งนี้จะรัน Cypress tests
+
