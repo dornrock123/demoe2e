@@ -42,6 +42,14 @@ jobs:
           ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
           find cypress/screenshots -name "*.png" || echo "No screenshot files found"
 
+      - name: List all components and test files
+        run: |
+          echo "Listing all component files in src/app:"
+          find src/app -type f -name "*.js"
+
+          echo "Listing all test files in cypress/e2e:"
+          find cypress/e2e -type f -name "*.spec.js"
+
       - name: Check for new components
         id: check-components
         run: |
