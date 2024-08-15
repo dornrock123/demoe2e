@@ -46,7 +46,7 @@ jobs:
         id: check-components
         run: |
           # List components in the source directory
-          find src/components -type f -name "*.js" | sed 's/src\/components\///' | sed 's/\.js$//' > new_components.txt
+          find src/app -type f -name "*.js" | sed 's/src\/spp\///' | sed 's/\.js$//' > new_components.txt
 
           # List test files
           find cypress/integration -type f -name "*.spec.js" | sed 's/cypress\/integration\///' | sed 's/\.spec\.js$//' > tested_components.txt
