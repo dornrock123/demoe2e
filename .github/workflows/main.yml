@@ -46,7 +46,7 @@ jobs:
         id: check-components
         run: |
           # List components in the source directory
-          find src/components -type f -name "*.js" | sed 's/src\/components\///' | sed 's/\.js$//' > new_components.txt
+          find src/app -type f -name "*.js" | sed 's/src\/app\///' | sed 's/\.js$//' > new_components.txt
           echo "New components:"
           cat new_components.txt
 
