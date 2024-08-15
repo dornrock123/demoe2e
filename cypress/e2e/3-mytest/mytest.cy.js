@@ -55,4 +55,29 @@ describe('App End-to-End Tests', () => {
     cy.get('input[type="hidden"]').should('have.value', 'build')
     cy.get('.terminal pre').should('have.text', 'ng build')
   })
+
+  it('should display the correct initial message', () => {
+    cy.contains('h2', 'Resources').should('be.visible')
+    cy.contains('p', 'Here are some links to help you get started:').should('be.visible')
+  })
+
+  it('should have all the resource links with correct href and text', () => {
+    const resources = [
+      { text: 'Learn Angular', href: 'https://angular.io/tutorial' },
+      { text: 'CLI Documentation', href: 'https://angular.io/cli' },
+      { text: 'Angular Material', href: 'https://material.angular.io' },
+      { text: 'Angular Blog', href: 'https://blog.angular.io/' },
+      { text: 'Angular DevTools', href: 'https://angular.io/devtools/' },
+    ]
+
+    resources.forEach(resource => {
+      cy.get(`a[href="${resource.href}"]`).within(() => {
+        cy.contains(resource.text).should('be.visible')
+      })
+    })
+  })
+
+  it('should open the link in a new tab', () => {
+    cy.get('a[target="_blank"]').should('have.attr', 'rel', 'noopener')
+  })
 });
