@@ -1,14 +1,15 @@
-name: Cypress Tests, Component Check, and Missing Test Detection
+name: Detect New Components Without Tests
 
 on:
   push:
-    paths:
-      - '**/*.component.ts'
-      - '**/*.cy.js'
-      - '**/*.spec.js'
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  cypress-run:
+  detect-new-components:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -16,113 +17,66 @@ jobs:
         with:
           fetch-depth: 0  # ดึง git history ทั้งหมด
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Start web server
+      - name: Detect new components without tests
         run: |
-          npm start &
-          sleep 10
-
-      - name: Wait for server to be available
-        run: npx wait-on http://localhost:4200
-
-      - name: Run Cypress tests
-        run: npx cypress run --config video=true
-        continue-on-error: true
-
-      - name: Check video creation
-        run: |
-          echo "Checking for videos:"
-          ls -la cypress/videos || echo "cypress/videos directory not found"
-          find cypress/videos -name "*.mp4" || echo "No video files found"
-
-      - name: Check screenshot creation
-        run: |
-          echo "Checking for screenshots:"
-          find cypress -name "screenshots" || echo "cypress/screenshots directory not found"
-          ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
-          find cypress/screenshots -name "*.png" || echo "No screenshot files found"
-
-      - name: Archive test videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: warn
-
-      - name: Archive test screenshots
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: warn
-
-      - name: Check for new Angular components and Cypress tests
-        run: |
-          git fetch origin
-          LAST_SUCCESSFUL_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
-          echo "Last successful commit: $LAST_SUCCESSFUL_COMMIT"
-          echo "Current commit: ${{ github.sha }}"
-          NEW_COMPONENTS=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT ${{ github.sha }} | grep -E "\.component\.ts$" || true)
-          echo "New components found:"
-          echo "$NEW_COMPONENTS"
-
-          if [ ! -z "$NEW_COMPONENTS" ]; then
-            echo "NEW_COMPONENTS<<EOF" >> $GITHUB_ENV
-            echo "$NEW_COMPONENTS" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-
-            # Check for missing Cypress tests
-            MISSING_TESTS=""
-            while IFS= read -r component; do
-              component_name=$(basename "$component" .component.ts)
-              cypress_test_e2e="cypress/e2e/${component_name}.cy.js"
-              cypress_test_integration="cypress/integration/${component_name}.spec.js"
-              if [ ! -f "$cypress_test_e2e" ] && [ ! -f "$cypress_test_integration" ]; then
-                MISSING_TESTS="${MISSING_TESTS}${component_name}\n"
-              fi
-            done <<< "$NEW_COMPONENTS"
-
-            if [ ! -z "$MISSING_TESTS" ]; then
-              echo "MISSING_TESTS<<EOF" >> $GITHUB_ENV
-              echo -e "$MISSING_TESTS" >> $GITHUB_ENV
-              echo "EOF" >> $GITHUB_ENV
-              echo "Components missing Cypress tests:"
-              echo -e "$MISSING_TESTS"
-            fi
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
           else
-            echo "No new components detected in this push."
+            BASE_SHA=$(git rev-parse HEAD^)
           fi
 
-      - name: Create issue for new components and missing tests
-        if: env.NEW_COMPONENTS
+          echo "Comparing with base SHA: $BASE_SHA"
+
+          NEW_COMPONENTS=$(git diff --name-only $BASE_SHA ${{ github.sha }} | grep -E "\.component\.ts$" || true)
+
+          if [ -z "$NEW_COMPONENTS" ]; then
+            echo "No new components detected."
+            exit 0
+          fi
+
+          echo "New components detected:"
+          echo "$NEW_COMPONENTS"
+
+          COMPONENTS_WITHOUT_TESTS=""
+          while IFS= read -r component; do
+            component_name=$(basename "$component" .component.ts)
+            component_dir=$(dirname "$component")
+            cypress_test_e2e="cypress/e2e/${component_name}.cy.ts"
+            cypress_test_integration="cypress/integration/${component_name}.spec.ts"
+            component_test="${component_dir}/${component_name}.component.spec.ts"
+
+            if [ ! -f "$cypress_test_e2e" ] && [ ! -f "$cypress_test_integration" ] && [ ! -f "$component_test" ]; then
+              COMPONENTS_WITHOUT_TESTS="${COMPONENTS_WITHOUT_TESTS}${component}\n"
+            fi
+          done <<< "$NEW_COMPONENTS"
+
+          if [ ! -z "$COMPONENTS_WITHOUT_TESTS" ]; then
+            echo "COMPONENTS_WITHOUT_TESTS<<EOF" >> $GITHUB_ENV
+            echo -e "$COMPONENTS_WITHOUT_TESTS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "Components without tests:"
+            echo -e "$COMPONENTS_WITHOUT_TESTS"
+          else
+            echo "All new components have tests."
+          fi
+
+      - name: Create issue for components without tests
+        if: env.COMPONENTS_WITHOUT_TESTS
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GH_TOK}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const newComponents = process.env.NEW_COMPONENTS.split('\n').filter(Boolean);
-            const missingTests = process.env.MISSING_TESTS ? process.env.MISSING_TESTS.split('\n').filter(Boolean) : [];
+            const componentsWithoutTests = process.env.COMPONENTS_WITHOUT_TESTS.split('\n').filter(Boolean);
 
-            let body = 'The following new components were detected in this push:\n\n' + newComponents.map(c => `- ${c}`).join('\n');
+            const body = `The following new components are missing tests:
 
-            if (missingTests.length > 0) {
-              body += '\n\nThe following components are missing Cypress tests:\n\n' + missingTests.map(c => `- ${c}`).join('\n');
-              body += '\n\nPlease add Cypress tests for these components.';
-            } else {
-              body += '\n\nAll new components have corresponding Cypress tests. Great job!';
-            }
+            ${componentsWithoutTests.map(c => `- ${c}`).join('\n')}
+
+            Please add tests for these components.`;
 
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: 'New Angular Components Detected (Some Missing Cypress Tests)',
+              title: 'New Angular Components Detected Without Tests',
               body: body
             });
