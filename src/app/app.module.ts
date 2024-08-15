@@ -3,13 +3,15 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { TecomComponent } from './tecom/tecom.component';
+import { TcomComponent } from './tcom/tcom.component';
+
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    TecomComponent,
+    TcomComponent,
+
   ],
   imports: [
     BrowserModule,
