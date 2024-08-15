@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2] # Use 2 parallel instances if desired
+        containers: [1, 2]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,25 +17,42 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Cypress
         run: npx cypress install
 
-      - name: Install start-server-and-test
-        run: npm install start-server-and-test --save-dev
-
       - name: Start server and run tests
-        run: npx start-server-and-test start http://localhost:4200 "npx cypress run"
+        run: |
+          npm start &
+          npx wait-on http://localhost:4200
+          npx cypress run --config video=true --reporter json > cypress-results.json
+
+      - name: Display Cypress run results
+        run: |
+          echo "Cypress test results:"
+          cat cypress-results.json
+        if: always()
 
       - name: Archive test results
         uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-results
+          path: cypress-results.json
+
+      - name: Archive test screenshots
+        uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
+          if-no-files-found: ignore
 
       - name: Archive test videos
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: cypress-videos
           path: cypress/videos
+          if-no-files-found: ignore

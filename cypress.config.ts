@@ -5,6 +5,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
+    video: true,
     baseUrl: 'http://localhost:4200',
     projectId: 'vij7ps' // เพิ่ม projectId ที่นี่
   },
