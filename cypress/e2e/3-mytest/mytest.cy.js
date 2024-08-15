@@ -82,4 +82,34 @@ describe('App End-to-End Tests', () => {
   it('should open the link in a new tab', () => {
     cy.get('a[target="_blank"]').should('have.attr', 'rel', 'noopener')
   })
+
+  it('should display the footer with the correct content and links', () => {
+    // ตรวจสอบข้อความใน footer
+    cy.contains('Love Angular?').should('be.visible');
+
+    // ตรวจสอบลิงก์แรก
+    cy.get('footer a').first()
+      .should('have.attr', 'href', 'https://github.com/angular/angular')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'rel', 'noopener');
+
+    // ตรวจสอบว่า icon SVG ในลิงก์แรกมีอยู่
+    cy.get('footer .github-star-badge svg')
+      .should('be.visible')
+      .and('have.attr', 'width', '24')
+      .and('have.attr', 'height', '24');
+
+    // ตรวจสอบลิงก์ที่สอง
+    cy.get('footer a').last()
+      .should('have.attr', 'href', 'https://github.com/angular/angular')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'rel', 'noopener');
+
+    // ตรวจสอบว่า icon SVG ในลิงก์ที่สองมีอยู่
+    cy.get('footer svg')
+      .should('be.visible')
+      .and('have.attr', 'width', '24')
+      .and('have.attr', 'height', '24');
+  });
+
 });
