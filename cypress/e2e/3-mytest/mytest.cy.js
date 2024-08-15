@@ -5,7 +5,7 @@ describe('App End-to-End Tests', () => {
     cy.visit('http://localhost:4200'); // Adjust the URL to your app's local or test environment
   });
 
-  it('should display the welcome message', () => {
+  it('should display the welcome messa', () => {
     cy.get('.toolbar').should('be.visible');
     cy.get('.highlight-card').should('contain.text', 'app is running!');
   });
