@@ -20,7 +20,6 @@ jobs:
       - name: Start web server
         run: |
           npm start &
-          # Optionally wait for the server to start
           sleep 10
 
       - name: Wait for server to be available
