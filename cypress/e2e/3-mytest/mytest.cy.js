@@ -66,7 +66,7 @@ describe('App End-to-End Tests', () => {
       { text: 'Learn Angular', href: 'https://angular.io/tutorial' },
       { text: 'CLI Documentation', href: 'https://angular.io/cli' },
       { text: 'Angular Material', href: 'https://material.angular.io' },
-      { text: 'Angular Blog', href: 'https://blog.angular.io/' },
+      { text: 'Angular Blog', href: 'https://blo.angular.io/' },
       { text: 'Angular DevTools', href: 'https://angular.io/devtools/' },
     ]
 
