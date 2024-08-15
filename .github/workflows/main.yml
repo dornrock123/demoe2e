@@ -29,6 +29,14 @@ jobs:
         run: npx cypress run --config video=true
         continue-on-error: true
 
+      - name: Install FFmpeg
+        run: sudo apt-get install -y ffmpeg
+
+      - name: Reduce video speed
+        run: |
+          ffmpeg -i cypress/videos/video.mp4 -filter:v "setpts=2.0*PTS" cypress/videos/video-slow.mp4
+
+
       - name: Check video creation
         run: |
           echo "Checking for videos:"
