@@ -5,6 +5,11 @@ on: [push]
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
