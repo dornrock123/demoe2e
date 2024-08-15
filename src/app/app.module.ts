@@ -8,7 +8,7 @@ import { TestcomComponent } from './testcom/testcom.component';
 @NgModule({
   declarations: [
     AppComponent,
-    TestcomComponent
+    TestcomComponent,
   ],
   imports: [
     BrowserModule,

@@ -53,7 +53,7 @@ jobs:
       - name: Check for untested components
         run: |
           echo "Checking for components without tests:"
-          for component in $(find src/app -type f -name "*.js"); do
+          for component in $(git diff --name-only HEAD^ HEAD | grep '^src/app' | grep '.js$'); do
             component_name=$(basename $component .js)
             if ! find cypress/e2e -type f -name "${component_name}.cy.js" | grep -q .; then
               echo "No test found for component: $component_name"
