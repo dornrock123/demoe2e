@@ -106,7 +106,7 @@ jobs:
         if: env.NEW_COMPONENTS
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.GH_TOK}}
           script: |
             const newComponents = process.env.NEW_COMPONENTS.split('\n').filter(Boolean);
             const missingTests = process.env.MISSING_TESTS ? process.env.MISSING_TESTS.split('\n').filter(Boolean) : [];
