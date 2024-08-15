@@ -1,5 +1,7 @@
 name: Cypress Tests
+
 on: [push]
+
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
@@ -22,7 +24,12 @@ jobs:
           ls -la cypress
 
       - name: Display Cypress config
-        run: cat cypress.config.js
+        run: |
+          if [ -f cypress.config.js ]; then
+            cat cypress.config.js
+          else
+            echo "cypress.config.js not found"
+          fi
 
       - name: Run Cypress tests
         run: npx cypress run --config video=true
@@ -37,7 +44,11 @@ jobs:
       - name: Display Cypress run logs
         run: |
           echo "Cypress run logs:"
-          cat cypress.log
+          if [ -f cypress.log ]; then
+            cat cypress.log
+          else
+            echo "cypress.log not found"
+          fi
 
       - name: Archive test videos
         uses: actions/upload-artifact@v2
