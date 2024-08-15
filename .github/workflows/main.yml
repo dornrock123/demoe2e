@@ -22,11 +22,9 @@ jobs:
           npm start &
           # Optionally wait for the server to start
           sleep 10
-        # Adjust the sleep duration based on how long your server needs to start
 
       - name: Wait for server to be available
         run: npx wait-on http://localhost:4200
-        # Adjust the URL and port based on your server configuration
 
       - name: Run Cypress tests
         run: npx cypress run --config video=true
@@ -35,14 +33,15 @@ jobs:
       - name: Check video creation
         run: |
           echo "Checking for videos:"
-          ls -la cypress/videos
-          find cypress/videos -name "*.mp4"
+          ls -la cypress/videos || echo "cypress/videos directory not found"
+          find cypress/videos -name "*.mp4" || echo "No video files found"
 
       - name: Check screenshot creation
         run: |
           echo "Checking for screenshots:"
-          ls -la cypress/screenshots
-          find cypress/screenshots -name "*.png"
+          find cypress -name "screenshots" || echo "cypress/screenshots directory not found"
+          ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
+          find cypress/screenshots -name "*.png" || echo "No screenshot files found"
 
       - name: Display Cypress run logs
         run: |
