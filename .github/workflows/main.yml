@@ -1,4 +1,4 @@
-name: Cypress Tests and Component Check
+name: Cypress Tests, Component Check, and Missing Test Detection
 
 on: [push]
 
@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # This is important for comparing with the previous commit
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -57,3 +59,55 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots
           if-no-files-found: warn
+
+      - name: Check for new Angular components and Cypress tests
+        run: |
+          NEW_COMPONENTS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E "\.component\.ts$" || true)
+          if [ ! -z "$NEW_COMPONENTS" ]; then
+            echo "NEW_COMPONENTS<<EOF" >> $GITHUB_ENV
+            echo "$NEW_COMPONENTS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "New components detected:"
+            echo "$NEW_COMPONENTS"
+
+            # Check for missing Cypress tests
+            MISSING_TESTS=""
+            while IFS= read -r component; do
+              component_name=$(basename "$component" .component.ts)
+              cypress_test="cypress/e2e/${component_name}.cy.js"
+              if [ ! -f "$cypress_test" ]; then
+                MISSING_TESTS="${MISSING_TESTS}${component_name}\n"
+              fi
+            done <<< "$NEW_COMPONENTS"
+
+            if [ ! -z "$MISSING_TESTS" ]; then
+              echo "MISSING_TESTS<<EOF" >> $GITHUB_ENV
+              echo -e "$MISSING_TESTS" >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
+              echo "Components missing Cypress tests:"
+              echo -e "$MISSING_TESTS"
+            fi
+          fi
+
+      - name: Create issue for new components and missing tests
+        if: env.NEW_COMPONENTS
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GH_TOK}}
+          script: |
+            const newComponents = process.env.NEW_COMPONENTS.split('\n').filter(Boolean);
+            const missingTests = process.env.MISSING_TESTS ? process.env.MISSING_TESTS.split('\n').filter(Boolean) : [];
+
+            let body = 'The following new components were detected in this push:\n\n' + newComponents.map(c => `- ${c}`).join('\n');
+
+            if (missingTests.length > 0) {
+              body += '\n\nThe following components are missing Cypress tests:\n\n' + missingTests.map(c => `- ${c}`).join('\n');
+              body += '\n\nPlease add Cypress tests for these components.';
+            }
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'New Angular Components Detected (Some Missing Cypress Tests)',
+              body: body
+            });
