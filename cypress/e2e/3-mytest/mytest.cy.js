@@ -56,7 +56,7 @@ describe('App End-to-End Tests', () => {
     cy.get('.terminal pre').should('have.text', 'ng build')
   })
 
-  it('should display the correct initial message', () => {
+    it('should display the correct initial message', () => {
     cy.contains('h2', 'Resources').should('be.visible')
     cy.contains('p', 'Here are some links to help you get started:').should('be.visible')
   })
@@ -66,7 +66,7 @@ describe('App End-to-End Tests', () => {
       { text: 'Learn Angular', href: 'https://angular.io/tutorial' },
       { text: 'CLI Documentation', href: 'https://angular.io/cli' },
       { text: 'Angular Material', href: 'https://material.angular.io' },
-      { text: 'Angular Blog', href: 'https://blo.angular.io/' },
+      { text: 'Angular Blog', href: 'https://blog.angular.io/' },
       { text: 'Angular DevTools', href: 'https://angular.io/devtools/' },
     ]
 
