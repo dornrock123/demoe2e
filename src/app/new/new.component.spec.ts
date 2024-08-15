@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TescomComponent } from './tescom.component';
+import { NewComponent } from './new.component';
 
-describe('TescomComponent', () => {
-  let component: TescomComponent;
-  let fixture: ComponentFixture<TescomComponent>;
+describe('NewComponent', () => {
+  let component: NewComponent;
+  let fixture: ComponentFixture<NewComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TescomComponent]
+      declarations: [NewComponent]
     });
-    fixture = TestBed.createComponent(TescomComponent);
+    fixture = TestBed.createComponent(NewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
