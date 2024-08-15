@@ -15,21 +15,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create Cypress folders
+      - name: Create and check Cypress folders
         run: |
           mkdir -p cypress/videos
           mkdir -p cypress/screenshots
-
-      - name: Check and fix permissions
-        run: |
           ls -la cypress
-          chmod -R 777 cypress
 
-      - name: List Cypress structure
-        if: always()
+      - name: Display Cypress config
+        run: cat cypress.config.js
+
+      - name: Run Cypress tests
+        run: npx cypress run --config video=true
+        continue-on-error: true
+
+      - name: Check video creation
         run: |
-          echo "Cypress folder structure:"
-          tree cypress || find cypress
+          echo "Checking for videos:"
+          ls -la cypress/videos
+          find cypress -name "*.mp4"
+
+      - name: Display Cypress run logs
+        run: |
+          echo "Cypress run logs:"
+          cat cypress.log
 
       - name: Archive test videos
         uses: actions/upload-artifact@v2
