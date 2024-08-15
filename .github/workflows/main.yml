@@ -42,28 +42,6 @@ jobs:
           ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
           find cypress/screenshots -name "*.png" || echo "No screenshot files found"
 
-      - name: List all component files
-        id: list_components
-        run: |
-          echo "Listing all component files in src/app:"
-          find src/app -type f -name "*.js" | sort > components.txt
-
-      - name: List all test files
-        id: list_tests
-        run: |
-          echo "Listing all test files in cypress/e2e:"
-          find cypress/e2e -type f -name "*.cy.js" | sort > tests.txt
-
-      - name: Check for untested components
-        run: |
-          echo "Checking for components without tests:"
-          comm -23 <(sort components.txt) <(sort tests.txt) | while read component; do
-            component_name=$(basename $component .js)
-            if ! grep -q "${component_name}.cy.js" tests.txt; then
-              echo "No test found for component: $component_name"
-            fi
-          done
-
       - name: Archive test videos
         uses: actions/upload-artifact@v4
         if: always()
