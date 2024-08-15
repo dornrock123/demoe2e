@@ -1,4 +1,4 @@
-name: Cypress Tests
+name: Cypress Tests and Component Check
 
 on: [push]
 
@@ -42,6 +42,26 @@ jobs:
           ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
           find cypress/screenshots -name "*.png" || echo "No screenshot files found"
 
+      - name: Check for new components
+        id: check-components
+        run: |
+          # List components in the source directory
+          find src/components -type f -name "*.js" | sed 's/src\/components\///' | sed 's/\.js$//' > new_components.txt
+
+          # List test files
+          find cypress/integration -type f -name "*.spec.js" | sed 's/cypress\/integration\///' | sed 's/\.spec\.js$//' > tested_components.txt
+
+          # Compare components with tests
+          comm -23 <(sort new_components.txt) <(sort tested_components.txt) > missing_tests.txt
+
+          if [ -s missing_tests.txt ]; then
+            echo "Some components are missing tests!"
+            cat missing_tests.txt
+            exit 1
+          else
+            echo "All components have tests."
+          fi
+
       - name: Archive test videos
         uses: actions/upload-artifact@v4  # Updated to v4
         if: always()
@@ -56,4 +76,12 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
+          if-no-files-found: warn
+
+      - name: Archive missing tests report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: missing-tests-report
+          path: missing_tests.txt
           if-no-files-found: warn
