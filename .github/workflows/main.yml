@@ -50,32 +50,6 @@ jobs:
           echo "Listing all test files in cypress/e2e:"
           find cypress/e2e -type f -name "*.spec.js"
 
-      - name: Check for new components
-        id: check-components
-        run: |
-          # List components in the source directory
-          find src/app -type f -name "*.js" | sed 's/src\/app\///' | sed 's/\.js$//' > new_components.txt
-          echo "New components:"
-          cat new_components.txt
-
-          # List test files
-          find cypress/e2e -type f -name "*.spec.js" | sed 's/cypress\/e2e\///' | sed 's/\.spec\.js$//' > tested_components.txt
-          echo "Tested components:"
-          cat tested_components.txt
-
-          # Compare components with tests
-          comm -23 <(sort new_components.txt) <(sort tested_components.txt) > missing_tests.txt
-
-          # Display missing tests for debugging
-          echo "Missing tests:"
-          cat missing_tests.txt || echo "No missing tests found"
-
-          # Check if missing_tests.txt is empty and remove if it is
-          if [ ! -s missing_tests.txt ]; then
-            echo "All components have tests."
-            rm missing_tests.txt
-          fi
-
       - name: Archive test videos
         uses: actions/upload-artifact@v4
         if: always()
@@ -92,10 +66,4 @@ jobs:
           path: cypress/screenshots
           if-no-files-found: warn
 
-      - name: Archive missing tests report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: missing-tests-report
-          path: missing_tests.txt
-          if-no-files-found: warn
+
