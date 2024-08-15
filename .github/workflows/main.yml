@@ -17,19 +17,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create and check Cypress folders
+      - name: Start web server
         run: |
-          mkdir -p cypress/videos
-          mkdir -p cypress/screenshots
-          ls -la cypress
+          npm start &
+          # Optionally wait for the server to start
+          sleep 10
+        # Adjust the sleep duration based on how long your server needs to start
 
-      - name: Display Cypress config
-        run: |
-          if [ -f cypress.config.js ]; then
-            cat cypress.config.js
-          else
-            echo "cypress.config.js not found"
-          fi
+      - name: Wait for server to be available
+        run: npx wait-on http://localhost:4200
+        # Adjust the URL and port based on your server configuration
 
       - name: Run Cypress tests
         run: npx cypress run --config video=true
