@@ -5,11 +5,6 @@ on: [push]
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,7 +52,7 @@ jobs:
           fi
 
       - name: Archive test videos
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4  # Updated to v4
         if: always()
         with:
           name: cypress-videos
@@ -65,7 +60,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Archive test screenshots
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4  # Updated to v4
         if: always()
         with:
           name: cypress-screenshots
