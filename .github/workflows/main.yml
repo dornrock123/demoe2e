@@ -1,10 +1,6 @@
 name: Cypress Tests and Component Check
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: [push]
 
 jobs:
   cypress-run:
@@ -46,21 +42,24 @@ jobs:
           ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
           find cypress/screenshots -name "*.png" || echo "No screenshot files found"
 
-      - name: List all components and test files
+      - name: List all component files
+        id: list_components
         run: |
           echo "Listing all component files in src/app:"
-          find src/app -type f -name "*.js"
+          find src/app -type f -name "*.js" | sort > components.txt
 
+      - name: List all test files
+        id: list_tests
+        run: |
           echo "Listing all test files in cypress/e2e:"
-          find cypress/e2e -type f -name "*.cy.js"
+          find cypress/e2e -type f -name "*.cy.js" | sort > tests.txt
 
       - name: Check for untested components
         run: |
           echo "Checking for components without tests:"
-          git fetch origin ${GITHUB_BASE_REF}
-          for component in $(git diff --name-only ${GITHUB_SHA} ${GITHUB_BASE_REF} | grep '^src/app' | grep '.js$'); do
+          comm -23 <(sort components.txt) <(sort tests.txt) | while read component; do
             component_name=$(basename $component .js)
-            if ! find cypress/e2e -type f -name "${component_name}.cy.js" | grep -q .; then
+            if ! grep -q "${component_name}.cy.js" tests.txt; then
               echo "No test found for component: $component_name"
             fi
           done
