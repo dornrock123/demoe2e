@@ -36,7 +36,13 @@ jobs:
         run: |
           echo "Checking for videos:"
           ls -la cypress/videos
-          find cypress -name "*.mp4"
+          find cypress/videos -name "*.mp4"
+
+      - name: Check screenshot creation
+        run: |
+          echo "Checking for screenshots:"
+          ls -la cypress/screenshots
+          find cypress/screenshots -name "*.png"
 
       - name: Display Cypress run logs
         run: |
