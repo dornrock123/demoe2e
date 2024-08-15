@@ -25,9 +25,6 @@ jobs:
           ls -la cypress
           chmod -R 777 cypress
 
-      - name: Run Cypress with debug
-        run: DEBUG=cypress:* npx cypress run --config video=true
-
       - name: List Cypress structure
         if: always()
         run: |
