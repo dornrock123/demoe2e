@@ -70,6 +70,8 @@ describe('App End-to-End Tests', () => {
       { text: 'Angular DevTools', href: 'https://angular.io/devtools/' },
     ]
 
+    cy.visit('/resources');
+
     resources.forEach(resource => {
       cy.get(`a[href="${resource.href}"]`).within(() => {
         cy.contains(resource.text).should('be.visible')
