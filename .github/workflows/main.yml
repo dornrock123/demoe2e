@@ -51,21 +51,23 @@ jobs:
           # List test files
           find cypress/integration -type f -name "*.spec.js" | sed 's/cypress\/integration\///' | sed 's/\.spec\.js$//' > tested_components.txt
 
-          # Compare components with tests
-          comm -23 <(sort new_components.txt) <(sort tested_components.txt) > missing_tests.txt
-
+          # Display lists for debugging
           echo "New components:"
           cat new_components.txt
           echo "Tested components:"
           cat tested_components.txt
-          echo "Missing tests:"
-          cat missing_tests.txt
 
-          if [ -s missing_tests.txt ]; then
-            echo "Some components are missing tests!"
-          else
+          # Compare components with tests
+          comm -23 <(sort new_components.txt) <(sort tested_components.txt) > missing_tests.txt
+
+          # Display missing tests for debugging
+          echo "Missing tests:"
+          cat missing_tests.txt || echo "No missing tests found"
+
+          # Check if missing_tests.txt is empty and remove if it is
+          if [ ! -s missing_tests.txt ]; then
             echo "All components have tests."
-            rm missing_tests.txt || true
+            rm missing_tests.txt
           fi
 
       - name: Archive test videos
