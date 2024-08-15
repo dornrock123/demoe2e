@@ -54,6 +54,13 @@ jobs:
           # Compare components with tests
           comm -23 <(sort new_components.txt) <(sort tested_components.txt) > missing_tests.txt
 
+          echo "New components:"
+          cat new_components.txt
+          echo "Tested components:"
+          cat tested_components.txt
+          echo "Missing tests:"
+          cat missing_tests.txt
+
           if [ -s missing_tests.txt ]; then
             echo "Some components are missing tests!"
           else
