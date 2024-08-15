@@ -3,10 +3,6 @@ on: [push]
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,35 +15,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Start server and run tests
+      - name: Create Cypress folders
         run: |
-          npm start &
-          npx wait-on http://localhost:4200
-          npx cypress run --config video=true --reporter json > cypress-results.json
+          mkdir -p cypress/videos
+          mkdir -p cypress/screenshots
 
-      - name: Display Cypress run results
+      - name: Check and fix permissions
         run: |
-          echo "Cypress test results:"
-          cat cypress-results.json
-        if: always()
+          ls -la cypress
+          chmod -R 777 cypress
 
-      - name: Archive test results
-        uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: cypress-results
-          path: cypress-results.json
+      - name: Run Cypress with debug
+        run: DEBUG=cypress:* npx cypress run --config video=true
 
-      - name: Archive test screenshots
-        uses: actions/upload-artifact@v2
+      - name: List Cypress structure
         if: always()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
+        run: |
+          echo "Cypress folder structure:"
+          tree cypress || find cypress
 
       - name: Archive test videos
         uses: actions/upload-artifact@v2
@@ -55,4 +40,12 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-          if-no-files-found: ignore
+          if-no-files-found: warn
+
+      - name: Archive test screenshots
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: warn

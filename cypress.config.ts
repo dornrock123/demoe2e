@@ -6,6 +6,7 @@ export default defineConfig({
       // implement node event listeners here
     },
     video: true,
+    videosFolder: 'cypress/videos',
     baseUrl: 'http://localhost:4200',
     projectId: 'vij7ps' // เพิ่ม projectId ที่นี่
   },
