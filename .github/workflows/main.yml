@@ -42,15 +42,6 @@ jobs:
           ls -la cypress/screenshots || echo "cypress/screenshots directory not found"
           find cypress/screenshots -name "*.png" || echo "No screenshot files found"
 
-      - name: Display Cypress run logs
-        run: |
-          echo "Cypress run logs:"
-          if [ -f cypress.log ]; then
-            cat cypress.log
-          else
-            echo "cypress.log not found"
-          fi
-
       - name: Archive test videos
         uses: actions/upload-artifact@v4  # Updated to v4
         if: always()
